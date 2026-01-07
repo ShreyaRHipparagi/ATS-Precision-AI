@@ -411,14 +411,6 @@ Repository: https://github.com/ShreyaRHipparagi/ai-ats-resume-analyzer
 ## Contact
 Project maintainer: Shreya R. Hipparagi  
 Repository: https://github.com/ShreyaRHipparagi/ai-ats-resume-analyzer  
-For questions, feature requests, or enterprise inquiries, open an issue or send an email (add contact email in repo settings).
+For questions, feature requests, or enterprise inquiries, open an issue or send an email (shreyahipparagi2006@gmail.com).
 
----
 
-If you'd like, I can:
-- produce an OpenAPI (Swagger) spec for the API endpoints,
-- add example unit tests and CI workflow files to the repository,
-- generate a sample dashboard JSON-to-UI mapping or a minimal React demo,
-- or prepare a Docker Compose + production deployment guide.
-
-Tell me which of the above you'd like next and I'll prepare the files.
