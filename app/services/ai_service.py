@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import json
 import os
 
@@ -184,15 +184,7 @@ RESUME_ANALYSIS_SCHEMA = {
 
 class AIService:
     def __init__(self, api_key):
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash-lite",
-            generation_config={
-                "response_mime_type": "application/json",
-                "response_schema": RESUME_ANALYSIS_SCHEMA,
-                "temperature": 0.7,
-            }
-        )
+        self.client = genai.Client(api_key=api_key)
 
     def analyze_resume(self, resume_content, job_description):
         prompt = f"""
@@ -222,7 +214,15 @@ class AIService:
         Generate the response filling the provided JSON schema.
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt,
+                config={
+                    "response_mime_type": "application/json",
+                    "response_schema": RESUME_ANALYSIS_SCHEMA,
+                    "temperature": 0.7,
+                }
+            )
             return json.loads(response.text)
         except Exception as e:
             return {"error": f"AI Analysis Failed: {str(e)}"}
