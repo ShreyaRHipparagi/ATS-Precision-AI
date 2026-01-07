@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer | Powered by Google Gemini</title>
+
+    <!-- Google Fonts: Syncopate for headers, Inter for copy -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- External Dep: AOS (Animate on Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Confetti for celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- html2pdf for PDF export -->
+    <script src="{{ url_for('static', filename='js/html2pdf.bundle.min.js') }}"></script>
+
+    <!-- html2canvas for Share Cards -->
+    <script src="{{ url_for('static', filename='js/html2canvas.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+
+    <div class="mesh-container">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+        <div class="mesh-blob blob-3"></div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="navbar sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="/">
+                <div class="brand-icon">
+                    <i class="fas fa-brain icon-glow"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name syncopate">AI RESUME ANALYZER</span>
+                    <span class="brand-powered">Powered by <span class="gemini-badge">Google Gemini</span> <i
+                            class="fas fa-magic" style="color: var(--accent);"></i></span>
+                </div>
+            </a>
+            <div class="theme-switch" id="toggleTheme">
+                <div class="theme-knob"><i class="fas fa-moon" id="themeIco"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5 mt-lg-5">
+
+        <!-- Hero Section -->
+        <div class="row align-items-center" data-aos="zoom-out">
+            <div class="col-lg-7 text-center text-lg-start mb-5 mb-lg-0">
+                <h1 class="hero-title">AI RESUME<br>ANALYZER</h1>
+                <p class="hero-subtitle">🚀 Transform Your Career Journey</p>
+                <div class="lead-premium mb-4">
+                    <i class="fas fa-microchip mt-1 text-primary"></i>
+                    <span>The world’s most advanced AI-powered resume analysis engine, powered by Google Gemini to
+                        simulate HR decision-making and technical hiring standards.</span>
+                </div>
+                <div class="feature-grid justify-content-center justify-content-lg-start">
+                    <span class="intel-pill"><i class="fas fa-shield-halved text-primary"></i>99% ATS Precision</span>
+                    <span class="intel-pill"><i class="fas fa-vial-circle-check text-secondary"></i>Recruiter
+                        Validated</span>
+                    <span class="intel-pill"><i class="fas fa-magic" style="color: var(--accent);"></i>Gemini
+                        Powered</span>
+                    <span class="intel-pill"><i class="fas fa-file-lines text-primary"></i>AI Cover Letter</span>
+                    <span class="intel-pill"><i class="fas fa-route text-secondary"></i>Career Roadmap</span>
+                    <span class="intel-pill"><i class="fas fa-comments" style="color: var(--accent);"></i>Interview
+                        Prep</span>
+                    <span class="intel-pill"><i class="fas fa-dna text-primary"></i>Skill Gap DNA</span>
+                    <span class="intel-pill"><i class="fas fa-chart-line text-secondary"></i>Market Intel</span>
+                    <span class="intel-pill"><i class="fas fa-building" style="color: var(--accent);"></i>FAANG
+                        Matchmaker</span>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="glass-card p-4 p-lg-5" style="border-radius: 48px;">
+                    <form id="analyzeForm" method="post" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-primary syncopate"><i
+                                    class="fas fa-file-pdf me-2"></i>UPLOAD RESUME</label>
+                            <input type="file" name="resume" class="form-control" accept=".pdf" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-secondary syncopate"><i
+                                    class="fas fa-bullseye me-2"></i>JOB DESCRIPTION</label>
+                            <textarea name="job_description" class="form-control" rows="5"
+                                placeholder="Paste the target job description here..."
+                                required>{{ job_description }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-launch w-100">
+                            <i class="fas fa-wand-magic-sparkles me-2"></i>ANALYZE MY RESUME
+                        </button>
+                        <button type="button" class="btn btn-outline-primary w-100 mt-3" onclick="showHistory()">
+                            <i class="fas fa-history me-2"></i> VIEW HISTORY
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Career Coach Modal -->
+        <div class="modal fade" id="coachModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card">
+                    <div class="modal-header border-bottom border-glass">
+                        <h5 class="modal-title syncopate"><i class="fas fa-robot me-2"></i> AI CAREER COACH</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="coachWelcome" class="text-center py-4">
+                            <div class="display-1 mb-3">🤖</div>
+                            <h4>Hello! I'm your AI Coach.</h4>
+                            <p class="text-muted">Analyze a resume to get personalized career advice, tactical
+                                improvements, FAANG-level bullet points, and a professional 6-month roadmap tailored
+                                specifically to your goals.</p>
+                        </div>
+                        <div id="coachInsights" style="display: none;">
+                            <h6 class="text-primary syncopate mb-3 small">DIRECTIVES FROM THE COACH</h6>
+                            <ul class="coach-tips-list" id="coachTips">
+                                <!-- Tips populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-glass">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="mt-5 pt-lg-5" id="results">
+
+            {% if result.error %}
+            <div class="glass-card border-danger text-center p-5" data-aos="zoom-in">
+                <i class="fas fa-triangle-exclamation text-danger display-1 mb-4"></i>
+                <h2 class="text-danger mb-4">SYSTEM BREACH</h2>
+                <p class="h5 mb-4">{{ result.error }}</p>
+
+                {% if result.diagnostics %}
+                <div class="mt-5 text-start p-4 rounded-4 border border-glass"
+                    style="background: rgba(var(--danger-rgb), 0.05);">
+                    <h6 class="syncopate text-danger mb-3 small"><i class="fas fa-microchip me-2"></i>DIAGNOSTIC DATA
+                    </h6>
+                    <p class="small text-muted mb-2">ACTIVE MODEL: <span class="text-white">{{
+                            result.diagnostics.current_model }}</span></p>
+                    <p class="small text-muted mb-2">AVAILABLE ENDPOINTS:</p>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        {% for model in result.diagnostics.available_models %}
+                        <span class="badge border border-glass text-muted small" style="font-size: 0.7rem;">{{ model
+                            }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if result.raw %}
+                <button class="btn btn-outline-danger btn-sm mt-4" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#rawResponse">
+                    VIEW RAW LOGS
+                </button>
+                <div class="collapse mt-3" id="rawResponse">
+                    <pre class="p-3 text-start small text-muted border border-glass rounded-4"
+                        style="background: #000; overflow-x: auto;">{{ result.raw }}</pre>
+                </div>
+                {% endif %}
+            </div>
+            {% elif result.ats_analysis %}
+
+            <!-- Result Dashboard -->
+            <div class="glass-card p-0 overflow-hidden" data-aos="fade-up">
+
+                {% if result.candidate_info %}
+                <!-- Candidate Identity Banner -->
+                <div class="p-4 p-lg-5 text-center border-bottom border-glass persona-banner">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-4"
+                        style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 35px; transform: rotate(5deg); box-shadow: 0 25px 50px -12px rgba(var(--primary-rgb), 0.6);">
+                        <i class="fa-solid fa-user-tie text-white display-1"></i>
+                    </div>
+                    <h2 class="syncopate mb-2"
+                        style="font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: 8px; font-weight: 800;">{{
+                        result.candidate_info.name }}</h2>
+                    <p class="h4 text-primary fw-bold mb-3" style="letter-spacing: 3px; opacity: 0.9;">{{
+                        result.candidate_info.title
+                        }}</p>
+
+                    <div class="persona-badge">
+                        <i class="fas fa-microchip persona-icon"></i>
+                        <span class="persona-text">{{ result.candidate_info.career_persona }}</span>
+                    </div>
+
+                    <div class="mt-5 d-flex justify-content-center gap-5 flex-wrap">
+                        <div class="text-center">
+                            <div class="readiness-meter mb-2">
+                                <svg viewBox="0 0 100 100">
+                                    <circle class="meter-bg" cx="50" cy="50" r="45" />
+                                    <circle class="meter-val" cx="50" cy="50" r="45" id="readinessCircle" />
+                                </svg>
+                                <div class="position-absolute top-50 start-50 translate-middle">
+                                    <div class="h3 fw-black m-0">{{ result.candidate_info.readiness_score }}%</div>
+                                </div>
+                            </div>
+                            <div class="small fw-bold text-muted uppercase tracking-widest">INTERVIEW READINESS</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Nav Tabs + Action Buttons -->
+                <div class="p-4 border-bottom border-glass">
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-3">
+                        <ul class="nav nav-pills pills-premium mb-5" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tab-ats-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-ats" type="button" role="tab"><i
+                                        class="fas fa-microchip me-2"></i>ATS Analysis</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-verdict-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-verdict" type="button" role="tab"><i
+                                        class="fas fa-shield-halved me-2"></i>The Verdict</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-tailoring-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-tailoring" type="button" role="tab"><i
+                                        class="fas fa-dna me-2"></i>Tailoring</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-cover-letter-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-cover-letter" type="button" role="tab"><i
+                                        class="fas fa-magic me-2"></i>Cover Letter</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-advanced-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-advanced" type="button" role="tab"><i
+                                        class="fas fa-fingerprint me-2"></i>Insights</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-roadmap-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-roadmap" type="button" role="tab"><i
+                                        class="fas fa-route me-2"></i>Roadmap</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-interview-btn" data-bs-toggle="pill"
+                                    data-bs-target="#tab-interview" type="button" role="tab"><i
+                                        class="fas fa-bullseye me-2"></i>Interview Prep</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 flex-wrap" data-html2canvas-ignore="true">
+                        <button class="btn btn-download" onclick="downloadReport(this)">
+                            <i class="fas fa-file-pdf"></i> Download PDF
+                        </button>
+                        <button class="btn btn-share" onclick="generateShareCard()"
+                            style="background: linear-gradient(135deg, #0077b5, #00a0dc);">
+                            <i class="fab fa-linkedin"></i> Share to LinkedIn
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tab-content p-4 p-lg-5">
+
+                    <!-- TAB ATS -->
+                    <div class="tab-pane fade show active" id="tab-ats">
+                        <div class="row align-items-center">
+                            <div class="col-lg-5 text-center mb-5 mb-lg-0">
+                                <div class="score-hero">
+                                    <!-- PDF Only Score -->
+                                    <div class="pdf-only-score d-none" style="display: none;">
+                                        <h2 style="color: var(--primary); text-align: center;">ATS Score: {{
+                                            result.ats_analysis.overall_score }}/100</h2>
+                                    </div>
+                                    <svg class="score-ring" viewBox="0 0 200 200" data-html2canvas-ignore="true">
+                                        <defs>
+                                            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="var(--primary)" />
+                                                <stop offset="100%" stop-color="var(--secondary)" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle class="ring-bg" cx="100" cy="100" r="90" />
+                                        <circle class="ring-val" cx="100" cy="100" r="90" id="mainScoreRing" />
+                                    </svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <div class="h1 fw-black m-0" style="font-size: 4rem;" id="scoreCounter">0</div>
+                                        <div class="small fw-bold text-muted">ATS SCORE</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="row g-4 mb-4">
+                                    {% for icon, anim, key, label in [
+                                    ('laptop-code', 'fa-beat', 'skill_match', 'SKILL MATCH'),
+                                    ('magnifying-glass-chart', 'fa-fade', 'keyword_match', 'KEYWORDS'),
+                                    ('bullseye', 'fa-beat-fade', 'experience_relevance', 'RELEVANCE'),
+                                    ('magic', 'fa-bounce', 'formatting_quality', 'UI/FORMAT')
+                                    ] %}
+                                    <div class="col-6">
+                                        <div class="breakdown-card">
+                                            <div class="breakdown-icon-container mb-3">
+                                                <i class="fas fa-{{ icon }} {{ anim }} breakdown-icon-premium"></i>
+                                            </div>
+                                            <div class="breakdown-score">{{ result.ats_analysis.breakdown[key] }}%</div>
+                                            <div class="breakdown-label">{{ label }}</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <!-- Section Scores -->
+                                <div class="glass-card p-4 border-primary border-opacity-10">
+                                    <h6 class="fw-bold mb-3 text-muted"><i
+                                            class="fas fa-layer-group me-2"></i>SECTION-BY-SECTION ANALYSIS</h6>
+                                    <div class="row g-3">
+                                        {% for section, score in result.ats_analysis.section_scores.items() %}
+                                        <div class="col-6">
+                                            <div class="small fw-bold text-muted text-uppercase mb-1">{{ section }}
+                                            </div>
+                                            <div class="progress"
+                                                style="height: 6px; background: rgba(var(--primary-rgb), 0.15);">
+                                                <div class="progress-bar bg-primary section-progress-bar"
+                                                    data-score="{{ score }}"></div>
+                                            </div>
+                                            <div class="small mt-1 fw-bold">{{ score }}%</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5 p-4 p-lg-5 rounded-5 border border-primary border-opacity-10 shadow-2xl"
+                            style="background: rgba(var(--primary-rgb), 0.03) !important; backdrop-filter: blur(10px);">
+                            <h5 class="mb-5 text-center syncopate tracking-widest text-primary"><i
+                                    class="fas fa-brain-circuit me-3"></i>AI ANALYSIS BREAKDOWN</h5>
+
+                            <div class="row g-4 rotate-entrance">
+                                <!-- EXECUTIVE SUMMARY -->
+                                <div class="col-lg-12">
+                                    <div class="p-5 rounded-5 border border-primary border-opacity-20 shadow-lg position-relative overflow-hidden h-100 luxury-card-glow-blue"
+                                        style="background: linear-gradient(165deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.02));">
+                                        <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                                            <i class="fas fa-file-invoice fa-6x text-primary"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-primary mb-4 d-flex align-items-center">
+                                            <span class="p-2 bg-primary bg-opacity-20 rounded-3 me-3"><i
+                                                    class="fas fa-file-invoice"></i></span>
+                                            EXECUTIVE SUMMARY
+                                        </h6>
+                                        <div class="markdown-content text-main fs-5 opacity-90 lh-lg"
+                                            style="max-width: 900px;">{{
+                                            result.ats_analysis.explanation.executive_summary | replace('**', '') }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- KEYWORD PARITY -->
+                                <div class="col-md-6">
+                                    <div class="h-100 p-5 rounded-5 border border-secondary border-opacity-20 shadow-lg position-relative overflow-hidden luxury-card-glow-pink"
+                                        style="background: linear-gradient(165deg, rgba(244, 63, 94, 0.12), rgba(244, 63, 94, 0.02));">
+                                        <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                                            <i class="fas fa-magnifying-glass-chart fa-5x text-secondary"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-secondary mb-4 d-flex align-items-center">
+                                            <span class="p-2 bg-secondary bg-opacity-20 rounded-3 me-3"><i
+                                                    class="fas fa-magnifying-glass-chart"></i></span>
+                                            KEYWORD PARITY AUDIT
+                                        </h6>
+                                        <div class="markdown-content text-main opacity-80 lh-base">{{
+                                            result.ats_analysis.explanation.keyword_parity | replace('**', '') }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- QUANTIFICATION -->
+                                <div class="col-md-6">
+                                    <div class="h-100 p-5 rounded-5 border border-success border-opacity-20 shadow-lg position-relative overflow-hidden luxury-card-glow-green"
+                                        style="background: linear-gradient(165deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.02));">
+                                        <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                                            <i class="fas fa-calculator fa-5x text-success"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-success mb-4 d-flex align-items-center">
+                                            <span class="p-2 bg-success bg-opacity-20 rounded-3 me-3"><i
+                                                    class="fas fa-calculator"></i></span>
+                                            QUANTIFICATION SCORECARD
+                                        </h6>
+                                        <div class="markdown-content text-main opacity-80 lh-base">{{
+                                            result.ats_analysis.explanation.quantification_review | replace('**', '') }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- STRUCTURAL -->
+                                <div class="col-lg-12">
+                                    <div class="p-5 rounded-5 border border-info border-opacity-20 shadow-lg position-relative overflow-hidden luxury-card-glow-cyan"
+                                        style="background: linear-gradient(165deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.02));">
+                                        <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                                            <i class="fas fa-compass-drafting fa-6x text-info"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-info mb-4 d-flex align-items-center">
+                                            <span class="p-2 bg-info bg-opacity-20 rounded-3 me-3"><i
+                                                    class="fas fa-compass-drafting"></i></span>
+                                            STRUCTURAL INTEGRITY CHECK
+                                        </h6>
+                                        <div class="markdown-content text-main opacity-80 lh-base">{{
+                                            result.ats_analysis.explanation.structural_feedback | replace('**', '') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB VERDICT -->
+                    <div class="tab-pane fade" id="tab-verdict">
+                        <div class="text-center mb-5">
+                            <h4 class="mb-4">HR SENTIMENT PROTOCOL</h4>
+                            <div class="h1 fw-bold text-uppercase {% if result.recruiter_review.decision == 'Shortlisted' %}text-success{% elif result.recruiter_review.decision == 'Maybe' %}text-warning{% else %}text-danger{% endif %} mb-0"
+                                style="font-size: 5rem;">
+                                {{ result.recruiter_review.decision }}
+                            </div>
+                        </div>
+                        <div class="p-4 p-lg-5 mb-5 rounded-5 border border-glass"
+                            style="background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1));">
+                            <h4 class="mb-4 text-primary"><i class="fas fa-user-tie me-3"></i>THE RECRUITER'S TRUTH</h4>
+                            <p id="verdict-feedback" class="h4 lh-base font-inter italic">{{
+                                result.recruiter_review.honest_feedback | replace('** THE RECRUITER\'S TRUTH', '') |
+                                replace('THE RECRUITER\'S TRUTH', '') | replace('**', '') }}</p>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h5 class="mb-4 text-danger-emphasis"><i class="fas fa-ban me-2"></i>CRITICAL FAIL
+                                    POINTS</h5>
+                                {% for point in result.recruiter_review.critical_fail_points %}
+                                <div
+                                    class="px-4 py-4 mb-3 border-start border-4 border-danger bg-danger bg-opacity-5 rounded-5 markdown-content shadow-sm">
+                                    {{ point | replace('**', '') }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-4 text-success-emphasis"><i class="fas fa-check-double me-2"></i>LEVERAGE
+                                    STRENGTHS</h5>
+                                {% for point in result.recruiter_review.key_strengths %}
+                                <div
+                                    class="px-4 py-4 mb-3 border-start border-4 border-success bg-success bg-opacity-5 rounded-5 markdown-content shadow-sm">
+                                    {{ point | replace('**', '') }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB TAILORING -->
+                    <div class="tab-pane fade" id="tab-tailoring">
+                        <div class="mb-5">
+                            <h4 class="mb-4 text-primary">RECONSTRUCTED SUMMARY</h4>
+                            <div class="glass-card p-4 border-primary border-opacity-25 markdown-content h5 lh-lg">{{
+                                result.resume_tailoring.new_summary | replace('**', '') }}</div>
+                        </div>
+                        <div class="mb-5">
+                            <h4 class="mb-4 text-secondary">OPTIMIZED KEYWORDS</h4>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for skill in result.resume_tailoring.optimized_skills %}
+                                <span class="badge rounded-pill bg-primary px-4 py-3 h5">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="mb-4 text-info">ENHANCED IMPACT (GOOGLE)</h4>
+                            {% for bullet in result.resume_tailoring.enhanced_bullets %}
+                            <div class="bullet-box p-4 rounded-4 mb-4">
+                                <div class="small fw-bold text-muted mb-2 text-decoration-line-through">ORIGINAL: {{
+                                    bullet.original }}</div>
+                                <div class="h5 text-success mb-3 markdown-content">IMPROVED: {{ bullet.improved |
+                                    replace('**', '') }}</div>
+                                <div
+                                    class="p-3 bg-dark bg-opacity-50 rounded-3 border border-glass small text-info markdown-content">
+                                    <i class="fas fa-lightbulb me-2"></i><strong>WHY IT WORKS:</strong> {{
+                                    bullet.impact | replace('**', '') }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-5">
+                            <h4 class="mb-4 text-warning"><i class="fab fa-linkedin me-2"></i>LINKEDIN OPTIMIZATION</h4>
+                            <div class="row g-3">
+                                {% for tip in result.resume_tailoring.linkedin_tips %}
+                                <div class="col-md-6">
+                                    <div class="p-3 glass-card border-warning border-opacity-10 h-100">
+                                        <i class="fas fa-check-circle text-warning me-2"></i> <span
+                                            class="markdown-content d-inline">{{ tip | replace('**', '') }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB COVER LETTER -->
+                    <div class="tab-pane fade" id="tab-cover-letter">
+                        <div class="mb-5">
+                            <h4 class="mb-4 text-primary"><i class="fas fa-envelope-open-text me-2"></i>AI GENERATED
+                                COVER LETTER</h4>
+                            <div class="glass-card p-5 border-primary border-opacity-25 shadow-2xl position-relative overflow-hidden"
+                                style="background: rgba(var(--primary-rgb), 0.02) !important;">
+                                <div class="position-absolute top-0 end-0 p-4 opacity-5">
+                                    <i class="fas fa-envelope-open-text fa-10x"></i>
+                                </div>
+                                <div class="markdown-content text-main opacity-90 lh-lg font-monospace"
+                                    id="coverLetterContent" style="white-space: pre-wrap; letter-spacing: 0.5px;">
+                                    {{ result.resume_tailoring.cover_letter }}
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center gap-3 mt-4" data-html2canvas-ignore="true">
+                                <button class="btn btn-outline-primary" onclick="copyCoverLetter()">
+                                    <i class="fas fa-copy me-2"></i> COPY TO CLIPBOARD
+                                </button>
+                                <button class="btn btn-outline-info" onclick="downloadCoverLetter()">
+                                    <i class="fas fa-file-arrow-down me-2"></i> DOWNLOAD AS TXT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB ADVANCED -->
+                    <div class="tab-pane fade" id="tab-advanced">
+                        <!-- Market Intel Bar -->
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-4">
+                                <div
+                                    class="glass-card p-4 text-center border-success border-opacity-20 h-100 d-flex flex-column justify-content-center">
+                                    <div class="small fw-bold text-muted mb-3">GLOBAL SALARY BENCHMARK</div>
+
+                                    <div class="d-flex align-items-center justify-content-center mb-2">
+                                        <span class="fs-4 me-2">🇺🇸</span>
+                                        <div class="h5 fw-black text-success mb-0">{{
+                                            result.market_intel.salary_range_usd }}</div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-center mb-2">
+                                        <span class="fs-4 me-2">🇮🇳</span>
+                                        <div class="h5 fw-black text-success mb-0">{{
+                                            result.market_intel.salary_range_inr }}</div>
+                                    </div>
+
+                                    <p class="small text-muted mb-0 mt-3 fst-italic">Estimated via Market & Complexity
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="glass-card p-4 text-center border-warning border-opacity-20">
+                                    <div class="small fw-bold text-muted mb-2">MARKET DEMAND</div>
+                                    <div class="h2 fw-black text-warning">{{ result.market_intel.market_demand }}</div>
+                                    <p class="small text-muted mb-0">For current Skill Stack</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="glass-card p-4 text-center border-info border-opacity-20">
+                                    <div class="small fw-bold text-muted mb-2">TOP COMPETENCY</div>
+                                    <div class="h2 fw-black text-info" style="font-size: 1.5rem;">{{
+                                        result.market_intel.top_competencies[0] }}</div>
+                                    <p class="small text-muted mb-0">High-Impact Skill</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Skill Radar Visualization -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="glass-card p-4 text-center h-100">
+                                    <h3 class="mb-5 text-primary fw-bold syncopate">SKILL ARCHITECTURE</h3>
+                                    <div class="d-flex flex-wrap justify-content-center gap-4">
+                                        {% for skill, score in result.advanced_insights.skill_radar.items() %}
+                                        <div class="radar-item" style="width: 140px;">
+                                            <div class="position-relative mb-3">
+                                                <svg viewBox="0 0 100 100" style="width: 90px; height: 90px;">
+                                                    <circle cx="50" cy="50" r="45" fill="none"
+                                                        stroke="var(--glass-border)" stroke-width="5" />
+                                                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--primary)"
+                                                        stroke-width="5" stroke-dasharray="283" stroke-dashoffset="283"
+                                                        stroke-linecap="round" transform="rotate(-90 50 50)" />
+                                                </svg>
+                                                <div class="position-absolute top-50 start-50 translate-middle fw-bold h5 mb-0"
+                                                    style="font-size: 1.1rem;">{{ score }}%</div>
+                                            </div>
+                                            <div class="small fw-bold text-muted text-uppercase tracking-widest"
+                                                style="font-size: 0.85rem;">{{ skill
+                                                }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Skills Gap Bar Chart -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="glass-card p-5 h-100">
+                                    <h3 class="mb-5 text-secondary fw-bold syncopate">SKILLS GAP ANALYSIS</h3>
+                                    <div class="p-2">
+                                        {% for item in result.advanced_insights.skills_gap_chart %}
+                                        <div class="gap-bar-container mb-4">
+                                            <div class="gap-bar-labels mb-2">
+                                                <span class="h6 fw-bold mb-0">{{ item.skill }}</span>
+                                                <span class="text-muted fw-bold" style="font-size: 0.85rem;">Possessed:
+                                                    {{
+                                                    item.possessed }}% / Required: {{ item.required }}%</span>
+                                            </div>
+                                            <div class="gap-bar-track">
+                                                <div class="gap-bar-required" style="width: {{ item.required }}%"></div>
+                                                <div class="gap-bar-possessed" data-width="{{ item.possessed }}"></div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="glass-card p-5 h-100 text-center border-primary border-opacity-30 shadow-2xl luxury-card-glow-blue position-relative overflow-hidden"
+                                    style="background: linear-gradient(180deg, rgba(99, 102, 241, 0.1), rgba(0,0,0,0));">
+                                    <div class="mb-4">
+                                        <i class="fa-solid fa-microchip text-primary"
+                                            style="font-size: 5rem; filter: drop-shadow(0 0 20px rgba(var(--primary-rgb), 0.6));"></i>
+                                    </div>
+                                    <h4 class="mb-4 fw-black text-primary tracking-widest text-uppercase">TECHNICAL
+                                        DEPTH</h4>
+                                    <div class="p-4 bg-primary bg-opacity-5 rounded-5 border border-glass-subtle markdown-content text-start small lh-relaxed"
+                                        style="min-height: 250px;">
+                                        {{ result.advanced_insights.technical_depth_scouter | replace('**', '') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="glass-card p-5 h-100 text-center border-secondary border-opacity-30 shadow-2xl luxury-card-glow-pink position-relative overflow-hidden"
+                                    style="background: linear-gradient(180deg, rgba(244, 63, 94, 0.1), rgba(0,0,0,0));">
+                                    <div class="mb-4">
+                                        <i class="fa-solid fa-handshake text-secondary"
+                                            style="font-size: 5rem; filter: drop-shadow(0 0 20px rgba(var(--secondary-rgb), 0.6));"></i>
+                                    </div>
+                                    <h4 class="mb-4 fw-black text-secondary tracking-widest text-uppercase">CULTURE FIT
+                                    </h4>
+                                    <div class="p-4 bg-secondary bg-opacity-5 rounded-5 border border-glass-subtle markdown-content text-start small lh-relaxed"
+                                        style="min-height: 250px;">
+                                        {{ result.advanced_insights.culture_fit_predictor | replace('**', '') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="glass-card p-5 h-100 text-center border-accent border-opacity-30 shadow-2xl luxury-card-glow-cyan position-relative overflow-hidden"
+                                    style="background: linear-gradient(180deg, rgba(6, 182, 212, 0.1), rgba(0,0,0,0));">
+                                    <div class="mb-4">
+                                        <i class="fa-solid fa-rocket text-accent"
+                                            style="font-size: 5rem; filter: drop-shadow(0 0 20px rgba(var(--accent-rgb), 0.6));"></i>
+                                    </div>
+                                    <h4 class="mb-4 fw-black text-accent tracking-widest text-uppercase">FAANG MATCH
+                                    </h4>
+                                    <div class="p-4 bg-accent bg-opacity-5 rounded-5 border border-glass-subtle markdown-content text-start small lh-relaxed"
+                                        style="min-height: 250px;">
+                                        {{ result.advanced_insights.faang_matchmaker | replace('**', '') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB ROADMAP -->
+                    <div class="tab-pane fade" id="tab-roadmap">
+                        <div class="row g-5">
+                            <div class="col-lg-6">
+                                <h4 class="mb-4 text-danger"><i class="fas fa-triangle-exclamation me-2"></i>SKILL GAP
+                                    ALERT</h4>
+                                <div class="p-4 glass-card border-danger border-opacity-10 mb-5">
+                                    <h6 class="fw-bold mb-3">MISSING INFRASTRUCTURE:</h6>
+                                    <div class="d-flex flex-wrap gap-2 mb-4">
+                                        {% for s in result.skill_gap_analysis.missing_technical_skills %}
+                                        <div class="intel-pill pill-danger">{{ s }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <h6 class="fw-bold mb-3">CULTURAL GAPS:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for s in result.skill_gap_analysis.missing_soft_skills %}
+                                        <div class="intel-pill pill-warning">{{ s }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <h4 class="mb-4 text-success">CONSTRUCTION PROJECTS</h4>
+                                {% for p in result.skill_gap_analysis.recommended_projects %}
+                                <div class="glass-card p-4 mb-3 border-success border-opacity-10">
+                                    <h5 class="fw-bold mb-2">{{ p.title }}</h5>
+                                    <p class="small text-muted mb-3">{{ p.description | replace('**', '') }}</p>
+                                    <div class="d-flex gap-2">{% for t in p.tech_stack %}<span
+                                            class="badge border border-glass text-muted">#{{ t }}</span>{% endfor %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-lg-6">
+                                <h4 class="mb-4 text-primary">THE 180-DAY ASCENSION</h4>
+                                <div class="roadmap-container">
+                                    <div class="roadmap-line"></div>
+                                    {% for step in result.career_roadmap.learning_plan_6_months %}
+                                    <div class="roadmap-node" data-aos="fade-left"
+                                        data-aos-delay="{{ loop.index0 * 100 }}">
+                                        <div class="h5 fw-black text-primary mb-1">MONTH {{ step.month }}</div>
+                                        <p class="text-muted">{{ step.focus }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div
+                                    class="mt-4 p-4 rounded-5 border-start border-5 border-warning bg-warning bg-opacity-5">
+                                    <h5 class="text-warning mb-2"><i class="fas fa-trophy me-2"></i>WINNER'S CIRCLE
+                                        ADVICE</h5>
+                                    <p class="mb-0 italic">{{ result.career_roadmap.final_advice | replace('**', '') }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB INTERVIEW PREP -->
+                    <div class="tab-pane fade" id="tab-interview">
+                        <div class="row g-5">
+                            <div class="col-md-6">
+                                <h3 class="mb-5 border-bottom pb-3"><i
+                                        class="fas fa-keyboard text-primary me-3"></i>ALGORITHMIC & TECH</h4>
+                                    {% for q in result.interview_prep.technical_questions %}
+                                    <div class="p-4 glass-card mb-4 border-glass hover-primary">
+                                        <div class="h6 fw-bold text-primary mb-2">PROMPT {{ loop.index }}</div>
+                                        <p class="mb-0">{{ q }}</p>
+                                    </div>
+                                    {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <h3 class="mb-5 border-bottom pb-3"><i
+                                        class="fas fa-users-gear text-secondary me-3"></i>LEADERSHIP & CULTURE</h4>
+                                    {% for q in result.interview_prep.behavioral_questions %}
+                                    <div class="p-4 glass-card mb-4 border-glass hover-secondary">
+                                        <div class="h6 fw-bold text-secondary mb-2">PROMPT {{ loop.index }}</div>
+                                        <p class="mb-0">{{ q }}</p>
+                                    </div>
+                                    {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Ultra-Loader -->
+    <div id="loading-overlay">
+        <canvas id="matrix-canvas"></canvas>
+        <div class="scanline"></div>
+        <div class="cyber-spin mb-5"></div>
+        <h2 class="hero-title m-1" style="font-size: 3.5rem;" id="loadingTitle">ANALYZING RESUME...</h2>
+        <p class="tracking-wide mt-3" id="loadingMessage">🔍 Scanning resume structure...</p>
+        <div class="loading-progress mt-4">
+            <div class="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- UI Helpers -->
+    <div id="scrollTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Scroll to Top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- AI FAB -->
+    <div class="ai-avatar" id="aiCoach" data-bs-toggle="modal" data-bs-target="#coachModal" title="Talk to AI Coach">
+        <i class="fas fa-robot icon-glow"></i>
+    </div>
+
+    <!-- Hidden Share Card Template -->
+    <div id="shareCard"
+        style="position: fixed; left: -9999px; top: 0; width: 600px; padding: 50px; background: linear-gradient(135deg, #0f172a, #1e1b4b); font-family: 'Outfit', sans-serif; color: #f8fafc; border-radius: 32px; border: 8px solid rgba(255,255,255,0.05); box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;">
+            <div>
+                <div style="font-size: 1.8rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #6366f1; margin-bottom: 5px;"
+                    id="shareCardName">CANDIDATE NAME</div>
+                <div style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;" id="shareCardTitle">Job Title</div>
+            </div>
+            <div
+                style="background: rgba(99, 102, 241, 0.1); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.2); font-size: 0.8rem; font-weight: 700; color: #6366f1;">
+                AI ARCHITECT</div>
+        </div>
+
+        <div
+            style="background: rgba(255,255,255,0.03); border-radius: 24px; padding: 40px; margin-bottom: 40px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="text-align: center;">
+                <div
+                    style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
+                    ATS SCORE</div>
+                <div style="font-size: 4.5rem; font-weight: 900; background: linear-gradient(to right, #6366f1, #22d3ee); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"
+                    id="shareCardScore">95</div>
+            </div>
+            <div style="height: 80px; width: 1px; background: rgba(255,255,255,0.1);"></div>
+            <div style="text-align: center;">
+                <div
+                    style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+                    HR VERDICT</div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: #22c55e; text-transform: uppercase;"
+                    id="shareCardDecision">SHORTLISTED</div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
+            <div style="font-size: 1.5rem;">🤖</div>
+            <div style="font-size: 0.9rem; color: #64748b; font-weight: 500;">
+                Analyzed by <span style="color: #f8fafc; font-weight: 700;">AI Resume Analyzer</span> • Powering Careers
+                with Gemini
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-5 text-center mt-5 border-top border-glass border-opacity-10">
+        <div class="container">
+            <h5 class="syncopate mb-3 text-primary">AI RESUME ANALYZER</h5>
+            <p class="text-muted small mb-2">Powered by <span class="gemini-badge">Google Gemini</span></p>
+            <p class="text-muted small">© 2026 AI-Powered Career Intelligence Engine • Built by Shreya R
+                Hipparagi</p>
+        </div>
+    </footer>
+
+    <!-- Dedicated Robust PDF Capture Template (Hidden) -->
+    <div id="pdf-capture-container"
+        style="position: absolute; left: -9999px; top: 0; width: 800px; background: white; color: black; padding: 40px; font-family: 'Inter', sans-serif; display: none;">
+        <div style="border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; text-align: center;">
+            <h1 style="margin: 0; color: #6366f1; font-family: 'Syncopate', sans-serif;">RESUME ANALYSIS REPORT</h1>
+            <p style="margin: 5px 0 0 0; color: #64748b; text-transform: uppercase; letter-spacing: 2px;">Powered by AI
+                Resume Analyzer</p>
+        </div>
+        <div id="pdf-content-target">
+            <!-- Content injected via JS -->
+        </div>
+        <div
+            style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
+            © 2026 AI-Powered Career Intelligence Engine • Built by Shreya R Hipparagi • confidential analysis
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        window.RESUME_DATA = {{ result | tojson | safe if result else 'null' }};
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

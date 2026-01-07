@@ -1,0 +1,7 @@
+
+google-generativeai
+python-dotenv
+PyMuPDF
+jinja2
+Flask
+gunicorn

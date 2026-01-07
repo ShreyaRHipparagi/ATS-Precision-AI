@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-resume-analyzer-gemini"
+version = "0.1.0"
+authors = [
+  { name="Author Name", email="author@example.com" },
+]
+description = "A premium AI-powered resume analyzer using Google Gemini"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "Flask>=2.3.3",
+    "PyMuPDF>=1.26.7",
+    "google-generativeai>=0.8.6",
+    "python-dotenv>=1.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/kumaresankp/Resume_Analyser_Using_Python"
+"Bug Tracker" = "https://github.com/kumaresankp/Resume_Analyser_Using_Python/issues"
+
+[project.scripts]
+resume-analyzer = "main:app.run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+include = [
+    "templates/*",
+    "static/*",
+    "analyse_pdf.py",
+    "main.py"
+]
