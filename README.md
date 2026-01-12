@@ -1,6 +1,7 @@
 # 🧠 AI Career Architect — Resume & Career Intelligence
 
 [![Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini%202.5-blue?logo=google-gemini)](https://aistudio.google.com/app/apikey) [![Flask](https://img.shields.io/badge/Backend-Flask-black?logo=flask)](https://flask.palletsprojects.com/) [![Design](https://img.shields.io/badge/Design-Glassmorphism-purple?logo=css3)](https://developer.mozilla.org/en-US/docs/Web/CSS) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now-success?style=for-the-badge)](https://ats-analyser-ai.onrender.com/)
 
 **AI Career Architect** is an elite, end-to-end resume intelligence platform designed to help professionals escape the "black hole" of automated rejections. By combining high-fidelity PDF parsing with a multi-persona AI orchestration (Google Gemini 2.5 Flash), the system delivers a hyper-visual dashboard of metrics, FAANG-level bullet rewrites, and a personalized 6-month roadmap.
 
@@ -19,6 +20,20 @@ Table of contents
 - Contributing
 - License & credits
 - Contact
+
+---
+
+## 🎥 Product Demo
+<a href="https://drive.google.com/file/d/1LrRFotZYgaQVZgZAix5x138MmHEXdOAj/view?usp=sharing" target="_blank">
+  <img src="https://img.shields.io/badge/▶_WATCH_FULL_DEMO_VIDEO-Click_Here-red?style=for-the-badge&logo=youtube" alt="Watch Demo" height="50" />
+</a>
+
+
+Witness the AI Career Architect in action as it:
+1. **Parses** a complex PDF resume in seconds.
+2. **Simulates** a cynical recruiter's rejection logic.
+3. **Rewrites** bullet points into FAANG-level impact statements.
+4. **Generates** a tailored cover letter and 6-month career roadmap.
 
 ---
 
